@@ -4,3 +4,9 @@ __pycache__/
 ai_module/models/*.env
 ivivu_blog/
 *.zip
+data/uploads/
+data/chroma_db/
+backend/chroma_db/
+travelchatbot_tools.egg-info/
+output.txt
+docs/a3.pdf
