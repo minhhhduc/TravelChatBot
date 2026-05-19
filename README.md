@@ -37,3 +37,17 @@ travelchatbot-preprocess --format article `
 ```
 
 Tài liệu chi tiết pipeline/workflow: `docs/DataPipeline.md`.
+
+## API v1
+
+Lumi Travel AI API v1 nằm dưới prefix `/api/v1` và đã được tách theo router domain:
+
+- `backend/routers/api_v1/auth.py`
+- `backend/routers/api_v1/voice.py`
+- `backend/routers/api_v1/destinations.py`
+- `backend/routers/api_v1/planner.py`
+- `backend/routers/api_v1/evidence.py`
+- `backend/routers/api_v1/dashboard.py`
+- `backend/routers/api_v1/images.py`
+
+Tài liệu endpoint chi tiết: `docs/API_V1.md`.
