@@ -1,0 +1,213 @@
+{
+  "generated_at_utc": "2026-05-19T04:41:35.205704+00:00",
+  "input": "data/raw/raw.jsonl",
+  "output": "data/processed/preprocessed_data.sample.jsonl",
+  "format": "article",
+  "articles": 100,
+  "keypoints": 161,
+  "skipped_articles": 0,
+  "skipped_keypoints": 0,
+  "json_errors": 0,
+  "top_destinations": [
+    {
+      "destination": "Campuchia",
+      "count": 3
+    },
+    {
+      "destination": "Nha Trang",
+      "count": 2
+    },
+    {
+      "destination": "Côn Đảo (nay thuộc TP.HCM)",
+      "count": 2
+    },
+    {
+      "destination": "Đà Lạt",
+      "count": 2
+    },
+    {
+      "destination": "Đà Nẵng 2026",
+      "count": 2
+    },
+    {
+      "destination": "Hạ Long có gì? Kinh nghiệm đi Hạ Long từ A",
+      "count": 2
+    },
+    {
+      "destination": "Hà Nội",
+      "count": 2
+    },
+    {
+      "destination": "Hong Kong",
+      "count": 2
+    },
+    {
+      "destination": "Huế 2026",
+      "count": 2
+    },
+    {
+      "destination": "Malaysia",
+      "count": 2
+    },
+    {
+      "destination": "Singapore",
+      "count": 2
+    },
+    {
+      "destination": "Cù Lao Câu",
+      "count": 1
+    },
+    {
+      "destination": "Cần Thơ chưa bao giờ hết \"hot\"",
+      "count": 1
+    },
+    {
+      "destination": "Singapore 2026",
+      "count": 1
+    },
+    {
+      "destination": "Lệ Giang",
+      "count": 1
+    },
+    {
+      "destination": "Tour Nhật Bản mùa hè",
+      "count": 1
+    },
+    {
+      "destination": "Villa Le Corail - A Gran Meliá Hotel",
+      "count": 1
+    },
+    {
+      "destination": "Alibu Nha Trang",
+      "count": 1
+    },
+    {
+      "destination": "Grand Signature By M Village Hội An",
+      "count": 1
+    },
+    {
+      "destination": "Đại Lý có gì hấp dẫn? Những trải nghiệm không thể bỏ lỡ",
+      "count": 1
+    },
+    {
+      "destination": "Amanoi 2026",
+      "count": 1
+    },
+    {
+      "destination": "6 điều làm nên sức hút của Ô Trấn",
+      "count": 1
+    },
+    {
+      "destination": "Đà Nẵng Food Tour 2026",
+      "count": 1
+    },
+    {
+      "destination": "9 tour Hàn Quốc tuyến Seoul",
+      "count": 1
+    },
+    {
+      "destination": "Top 9 quán cafe kids TP. HCM 2026",
+      "count": 1
+    },
+    {
+      "destination": "Villa 1 tỷ/3 đêm tại Amanoi Ninh Thuận",
+      "count": 1
+    },
+    {
+      "destination": "Vũng Tàu (thành phố Hồ Chí Minh)",
+      "count": 1
+    },
+    {
+      "destination": "đảo Nam Du có gì hay? Cẩm nang từ A đến Z 2026",
+      "count": 1
+    },
+    {
+      "destination": "Phan Thiết có gì hấp dẫn? Cẩm nang từ A đến Z",
+      "count": 1
+    },
+    {
+      "destination": "Phú Quốc 2026",
+      "count": 1
+    },
+    {
+      "destination": "Khuyến mãi vé tàu Hà Nội - Hải Phòng",
+      "count": 1
+    },
+    {
+      "destination": "Myanmar",
+      "count": 1
+    },
+    {
+      "destination": "Úc",
+      "count": 1
+    },
+    {
+      "destination": "Trung Quốc",
+      "count": 1
+    },
+    {
+      "destination": "Nhật Bản không thể bỏ qua",
+      "count": 1
+    },
+    {
+      "destination": "Hàn Quốc không thể bỏ qua",
+      "count": 1
+    },
+    {
+      "destination": "Vietravel Airlines tăng đội bay và khôi phục tuyến Hà Nội",
+      "count": 1
+    },
+    {
+      "destination": "Bảo tàng Cúc Phương Ninh Bình",
+      "count": 1
+    },
+    {
+      "destination": "Núi Lò Vôi",
+      "count": 1
+    },
+    {
+      "destination": "Làng chài Sơn Hải",
+      "count": 1
+    },
+    {
+      "destination": "Tàu hỏa “Hà Nội 5 Cửa Ô”",
+      "count": 1
+    },
+    {
+      "destination": "6 tour Thượng Hải",
+      "count": 1
+    },
+    {
+      "destination": "Du thuyền Disney Adventure",
+      "count": 1
+    },
+    {
+      "destination": "Top 4 tour Hokkaido",
+      "count": 1
+    },
+    {
+      "destination": "Sun PhuQuoc Airways mở bán đường bay TP.HCM",
+      "count": 1
+    },
+    {
+      "destination": "Săn vé tàu Hà Nội - Vinh chỉ từ 214.000 VND",
+      "count": 1
+    },
+    {
+      "destination": "After Glow Bà Nà Hills",
+      "count": 1
+    },
+    {
+      "destination": "InterContinental Ha Long Bay Resort",
+      "count": 1
+    },
+    {
+      "destination": "Vietravel Airlines ưu đãi 05/05",
+      "count": 1
+    },
+    {
+      "destination": "The Heritage Show Đà Nẵng",
+      "count": 1
+    }
+  ]
+}

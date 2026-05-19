@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "travelchatbot-tools"
+version = "0.1.0"
+description = "Utility tools for the TravelChatBot workspace (preprocessing, data prep)."
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "UNLICENSED"}
+authors = [{ name = "TravelChatBot" }]
+
+# No runtime deps needed for preprocessing (stdlib only)
+dependencies = []
+
+[project.scripts]
+travelchatbot-preprocess = "processer.preprocessing:main"
+
+[tool.setuptools.packages.find]
+include = ["processer*", "ai_module*"]

@@ -130,6 +130,13 @@ def post_message(
     bot: Chatbot = Depends(get_chatbot)
 ):
     """Sends a new text or multimodal query to the assistant and gets a RAG recommendation."""
+    # Enforce granular, media-type specific rate limits
+    from backend.rate_limiter import chat_rate_limiter
+    chat_rate_limiter.check_rate_limit(
+        user_id=current_user.id,
+        has_audio=(audio is not None),
+        has_image=(image is not None)
+    )
     # 1. Retrieve session and verify ownership
     session = db.query(ChatSession).filter(
         ChatSession.id == session_id,

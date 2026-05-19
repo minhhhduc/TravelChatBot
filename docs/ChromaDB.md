@@ -10,13 +10,17 @@ The database is built dynamically from the raw dataset. On initialization, the s
 
 ```mermaid
 graph TD
-    JSONL[data/raw/raw.jsonl] --> Parser[Line-by-Line JSONL Parser]
+    RAW[data/raw/raw.jsonl] --> PRE[Preprocess (clean + enrich)]
+    PRE --> CLEAN[data/processed/preprocessed_data.jsonl]
+    CLEAN --> Parser[Line-by-Line JSONL Parser]
     Parser --> Keypoints[Slices Keypoint Articles]
-    Keypoints --> StripHTML[Strips '[img]...[img]' Tags]
-    StripHTML --> Metadata[Enriches Metadata Fields]
+    Keypoints --> StripIMG[Strips '[img]...[img]' Tags for embedding]
+    StripIMG --> Metadata[Enriches Metadata Fields]
     Metadata --> Vectorizer[Generates Semantic Embeddings]
-    Vectorizer --> ChromaDB[(ChromaDB: recipes Collection)]
+    Vectorizer --> ChromaDB[(ChromaDB collection)]
 ```
+
+For the preprocessing commands and dataset schema, see `docs/DataPipeline.md`.
 
 ---
 

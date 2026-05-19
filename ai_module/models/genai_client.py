@@ -66,11 +66,57 @@ class GeminiClient:
             ...     system_instruction="Always respond in Vietnamese"
             ... )
         """
+        import os
+        self.model = os.getenv("MODELS") or "models/gemini-2.5-flash"
+        self.DEFAULT_MODEL = self.model
+        self.ADVANCED_MODEL = self.model
+        
         self.config = types.GenerateContentConfig(
             system_instruction=system_instruction
         )
         self.client = genai.Client(api_key=api_key)
         self.chat_session = None  # Will be created when starting chat
+
+        # Dynamically wrap self.client.models.generate_content to handle automatic fallbacks
+        original_generate = self.client.models.generate_content
+        def safe_generate_content(*args, **kwargs):
+            model_val = kwargs.get("model") or (args[0] if len(args) > 0 else None)
+            try:
+                return original_generate(*args, **kwargs)
+            except Exception as e:
+                fallback = "models/gemini-2.5-flash"
+                if model_val and model_val != fallback:
+                    print(f"⚠️  Model '{model_val}' failed: {e}. Automatically falling back to '{fallback}'...")
+                    if "model" in kwargs:
+                        kwargs["model"] = fallback
+                    elif len(args) > 0:
+                        # args is a tuple, which is immutable
+                        args_list = list(args)
+                        args_list[0] = fallback
+                        args = tuple(args_list)
+                    return original_generate(*args, **kwargs)
+                raise e
+        self.client.models.generate_content = safe_generate_content
+
+        # Dynamically wrap self.client.chats.create to handle automatic fallbacks
+        original_chats_create = self.client.chats.create
+        def safe_chats_create(*args, **kwargs):
+            model_val = kwargs.get("model") or (args[0] if len(args) > 0 else None)
+            try:
+                return original_chats_create(*args, **kwargs)
+            except Exception as e:
+                fallback = "models/gemini-2.5-flash"
+                if model_val and model_val != fallback:
+                    print(f"⚠️  Chat session creation with '{model_val}' failed: {e}. Automatically falling back to '{fallback}'...")
+                    if "model" in kwargs:
+                        kwargs["model"] = fallback
+                    elif len(args) > 0:
+                        args_list = list(args)
+                        args_list[0] = fallback
+                        args = tuple(args_list)
+                    return original_chats_create(*args, **kwargs)
+                raise e
+        self.client.chats.create = safe_chats_create
 
     def start_chat_session(self, model: Optional[str] = None, system_instruction: str = ""):
         """Start a new chat session with Gemini for conversation context.
@@ -218,6 +264,39 @@ class GeminiClient:
         except Exception as e:
             print(f"⚠️  Back-translation failed: {e}. Using original English text.")
             return text
+
+    def to_vietnamese(self, text: str, model: Optional[str] = None) -> tuple[str, str]:
+        """Translate any-language text to Vietnamese (for RAG over Vietnamese corpus).
+
+        Returns:
+            (vietnamese_text, detected_source_language)
+        """
+        if not text:
+            return "", "vi"
+
+        # Use existing language detection + translation-to-English, then pivot to Vietnamese.
+        english, detected = self.translate_to_english(text, model=model)
+        detected = (detected or "unknown").lower()
+        if detected == "vi":
+            return text, "vi"
+
+        vietnamese = self.translate_from_english(english, target_language="vi", model=model)
+        return vietnamese, detected
+
+    def from_vietnamese(self, text_vi: str, target_language: str, model: Optional[str] = None) -> str:
+        """Translate Vietnamese text back to the target language (keeps markdown)."""
+        if not text_vi:
+            return ""
+
+        target_language = (target_language or "unknown").lower()
+        if target_language in ("vi", "unknown"):
+            return text_vi
+
+        english, _detected = self.translate_to_english(text_vi, model=model)
+        if target_language == "en":
+            return english
+
+        return self.translate_from_english(english, target_language=target_language, model=model)
     
     def rewrite_query_with_context(self, user_query: str, conversation_history: list = None) -> str:
         """Rewrite vague queries using conversation context for better search.
@@ -570,9 +649,18 @@ class GeminiClient:
         current_prompt = prompts.get_rag_with_history_prompt(user_query, context_text)
         
         # Send message through chat session
-        response = self.chat_session.send_message(current_prompt)
-        
-        return response.text
+        try:
+            response = self.chat_session.send_message(current_prompt)
+            return response.text
+        except Exception as e:
+            fallback = "models/gemini-2.5-flash"
+            current_model = getattr(self.chat_session, 'model', '') or self.model
+            if current_model != fallback:
+                print(f"⚠️  Chat send_message failed with model '{current_model}': {e}. Re-initializing session with '{fallback}'...")
+                self.start_chat_session(model=fallback, system_instruction=system_instruction)
+                response = self.chat_session.send_message(current_prompt)
+                return response.text
+            raise e
     
     def reset_chat_session(self):
         """Reset the chat session to start fresh conversation.

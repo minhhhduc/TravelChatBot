@@ -1,21 +1,22 @@
-"""ChromaDB vector database manager for recipe storage and retrieval.
+"""ChromaDB vector database manager for TravelChatBot storage and retrieval.
 
 This module provides the ChromaDBManager class for managing recipe data
 in a vector database, including document storage, semantic search, and
 RAG (Retrieval-Augmented Generation) context preparation.
 
-Author: FoodChatbot Team
-Version: 1.0.0
+Author: TravelChatBot Team
+Version: 2.0.0
 """
 import chromadb
 import json
+import hashlib
 from typing import List, Dict, Any, Optional
 from pathlib import Path
 
 from . import config
 
 class ChromaDBManager:
-    """Manages ChromaDB interactions for recipe storage and retrieval.
+    """Manages ChromaDB interactions for TravelChatBot storage and retrieval.
     
     This class handles all operations with the ChromaDB vector database,
     including recipe data loading, document embedding, semantic search,
@@ -61,10 +62,11 @@ class ChromaDBManager:
         print(f"INFO: Initializing ChromaDBManager with DB path: '{db_path}'")
         self.client = chromadb.PersistentClient(path=db_path)
         self._collections: Dict[str, chromadb.Collection] = {}
+        self.json_path = json_path
         
+        # Loaded items from json/jsonl. Name kept for backward-compat.
+        # Keep this lazy so normal chat queries do not read the full dataset.
         self.recipes: List[Dict[str, Any]] = []
-        if json_path:
-            self.load_recipes_from_json(json_path)
         
         self.set_of_nuts = self._extract_nutrition_keys()
         print("INFO: ChromaDBManager ready.")
@@ -256,7 +258,7 @@ class ChromaDBManager:
         return [idx for idx, _ in indexed_values[:limit]]
 
     def add_recipes_to_collection(self, collection_name: str = "recipes", batch_size: int = 100) -> int:
-        """Adds all loaded recipes to a ChromaDB collection in batches.
+        """Adds all loaded items to a ChromaDB collection in batches.
         
         Processes the loaded recipe data and stores it in ChromaDB for vector search.
         Each recipe is converted to a searchable text format and stored with
@@ -286,8 +288,11 @@ class ChromaDBManager:
             >>> count = manager.add_recipes_to_collection("my_recipes", 50)
             >>> print(f"Added {count} recipes to ChromaDB")
         """
+        if not self.recipes and self.json_path:
+            self.load_recipes_from_json(self.json_path)
+
         if not self.recipes:
-            print("WARNING: No recipes loaded to add to the collection.")
+            print("WARNING: No items loaded to add to the collection.")
             return 0
         
         collection = self.get_or_create_collection(name=collection_name)
@@ -299,56 +304,67 @@ class ChromaDBManager:
             
             documents, metadatas, ids = [], [], []
             
-            # Check if this batch consists of travel guides (e.g. have 'keypoint' field)
-            is_travel = False
-            if batch and ("keypoint" in batch[0] or "title" in batch[0] and "time" in batch[0]):
-                is_travel = True
+            # Detect travel articles by the presence of `keypoint` list.
+            is_travel = bool(batch) and isinstance(batch[0], dict) and "keypoint" in batch[0]
                 
             if is_travel:
                 import re
+                img_re = re.compile(r"\[img\]\s*(.*?)\s*\[img\]", flags=re.IGNORECASE | re.DOTALL)
+
                 for article in batch:
                     try:
-                        article_title = article.get("title", "").replace(" - iVIVU.com", "").strip()
-                        article_time = article.get("time", "2026-01-01")
-                        url = article.get("url", "") or article.get("URL", "") or "https://www.ivivu.com/blog"
-                        
-                        for kp in article.get("keypoint", []):
-                            idx_info = kp.get("idx", {})
+                        article_title = str(article.get("title", "") or "").strip()
+                        article_time = str(article.get("time", "") or "")
+                        url = str(article.get("url", "") or article.get("URL", "") or "").strip()
+                        destination = str(article.get("destination", "") or "").strip()
+
+                        for kp in article.get("keypoint", []) or []:
+                            idx_info = (kp or {}).get("idx", {}) or {}
                             kp_idx = idx_info.get("idx", 1)
-                            kp_title = idx_info.get("title", "").strip()
-                            kp_context = idx_info.get("context", "")
-                            
+                            kp_title = str(idx_info.get("title", "") or "").strip()
+                            kp_context = str(idx_info.get("context", "") or "")
+
                             if not kp_context.strip():
                                 continue
-                                
-                            images = re.findall(r'\[img\]\s*(.*?)\s*\[img\]', kp_context)
-                            cleaned_context = re.sub(r'\[img\].*?\[img\]', '', kp_context).strip()
-                            
+
+                            images = [m.group(1).strip() for m in img_re.finditer(kp_context) if m.group(1).strip()]
+                            cleaned_context = img_re.sub(" ", kp_context).strip()
                             if not cleaned_context.strip():
                                 continue
-                                
-                            doc_content = f"Title: {article_title} | Spot/Section: {kp_title} | Content: {cleaned_context}"
-                            
-                            evaluate = kp.get("evaluate", {})
-                            evaluate_mean = float(evaluate.get("mean", 0.0))
-                            evaluate_count = int(len(evaluate.get("items", [])))
-                            
+
+                            doc_content = (
+                                f"Title: {article_title} | Spot: {kp_title} | Destination: {destination} | "
+                                f"Content: {cleaned_context}"
+                            )
+
+                            evaluate = (kp or {}).get("evaluate", {}) or {}
+                            try:
+                                evaluate_mean = float(evaluate.get("mean", 0.0) or 0.0)
+                            except Exception:
+                                evaluate_mean = 0.0
+                            items = evaluate.get("items", [])
+                            evaluate_count = int(len(items)) if isinstance(items, list) else 0
+
+                            # Stable id to avoid duplicates across reruns.
+                            id_seed = f"{url}|{article_title}|{kp_idx}|{kp_title}".encode("utf-8", errors="ignore")
+                            chunk_id = hashlib.sha1(id_seed).hexdigest()
+
                             metadata = {
                                 "url": url,
                                 "article_title": article_title,
                                 "keypoint_title": kp_title,
+                                "destination": destination,
                                 "time": article_time,
                                 "keypoint_idx": kp_idx,
                                 "evaluate_mean": evaluate_mean,
                                 "evaluate_count": evaluate_count,
-                                "images": ",".join(images)
+                                # Keep as JSON string for downstream parsing
+                                "images": json.dumps(images, ensure_ascii=False),
                             }
-                            
-                            chunk_id = f"spot_{total_added}_{kp_idx}"
+
                             documents.append(doc_content)
                             metadatas.append(metadata)
                             ids.append(chunk_id)
-                            total_added += 1
                     except Exception as e:
                         print(f"WARNING: Skipping travel article due to processing error: {e}")
             else:
@@ -373,7 +389,7 @@ class ChromaDBManager:
                         documents.append(content)
                         metadatas.append(metadata)
                         ids.append(recipe_id)
-                        total_added += 1
+                        # Note: count will be updated after successful add
                     except Exception as e:
                         print(f"WARNING: Skipping recipe due to processing error: {e}")
 
@@ -382,13 +398,18 @@ class ChromaDBManager:
 
             try:
                 collection.add(documents=documents, metadatas=metadatas, ids=ids)
-                total_added += len(documents)
-                print(f"Successfully added {len(documents)} recipes to '{collection_name}'.")
+                added = len(ids)
+                total_added += added
+                print(f"SUCCESS: Added {added} documents to '{collection_name}'.")
             except Exception as e:
                 print(f"ERROR: Failed to add batch to ChromaDB: {e}")
         
-        print(f"SUCCESS: Finished processing. Total new recipes added: {total_added}")
+        print(f"SUCCESS: Finished processing. Total new documents added: {total_added}")
         return total_added
+
+    def add_travel_guides_to_collection(self, collection_name: str, batch_size: int = 100) -> int:
+        """TravelChatBot-friendly alias for ingestion."""
+        return self.add_recipes_to_collection(collection_name=collection_name, batch_size=batch_size)
 
     def search(
         self, 
@@ -495,13 +516,16 @@ class ChromaDBManager:
             ... )
             >>> print(context["context"])  # Formatted recipes for LLM
         """
-        n_results = limit if sort_by else config.MAX_RESULTS
+        if sort_by:
+            n_results = min(max(limit * 3, limit), config.MAX_RESULTS)
+        else:
+            n_results = limit
         
         results = self.search(
             collection_name=collection_name,
             query_text=query_text,
             where=where,
-            n_results=min(n_results * 3, 100),  # Fetch more to sort from
+            n_results=n_results,
             
         )
         
@@ -530,8 +554,8 @@ class ChromaDBManager:
             # distance=2 (opposite) -> similarity=0.0
             similarity = max(0.0, 1.0 - distance)
 
-            # Only return results with high relevance to ensure database-only responses
-            if not sort_by and similarity < config.MIN_RELEVANCE_SCORE:
+            # Only return results above the configured cosine-similarity threshold.
+            if similarity < config.MIN_RELEVANCE_SCORE:
                 continue
 
             is_travel = 'article_title' in metadata
@@ -580,10 +604,19 @@ class ChromaDBManager:
             context_parts.append(entry)
             sources.append({"url": metadata.get('url', ''), "relevance_score": similarity, "metadata": metadata})
         
+        if not context_parts:
+            return {
+                "context": "No sufficiently relevant travel guides found.",
+                "sources": [],
+                "documents_found": 0,
+                "candidates_found": len(results['documents'][0]),
+            }
+
         return {
             "context": "\n\n".join(context_parts),
             "sources": sources,
-            "documents_found": len(results['documents'][0]),
+            "documents_found": len(context_parts),
+            "candidates_found": len(results['documents'][0]),
         }
 
 # Module-level instance to act as a singleton

@@ -1,0 +1,213 @@
+{
+  "generated_at_utc": "2026-05-19T04:41:23.449635+00:00",
+  "input": "data/raw/raw.jsonl",
+  "output": "data/processed/preprocessed_data.jsonl",
+  "format": "article",
+  "articles": 13275,
+  "keypoints": 24458,
+  "skipped_articles": 0,
+  "skipped_keypoints": 0,
+  "json_errors": 0,
+  "top_destinations": [
+    {
+      "destination": "Nhật Bản",
+      "count": 60
+    },
+    {
+      "destination": "Đà Lạt",
+      "count": 51
+    },
+    {
+      "destination": "Singapore",
+      "count": 42
+    },
+    {
+      "destination": "Trung Quốc",
+      "count": 42
+    },
+    {
+      "destination": "Phú Quốc",
+      "count": 37
+    },
+    {
+      "destination": "Thái Lan",
+      "count": 36
+    },
+    {
+      "destination": "Đà Nẵng",
+      "count": 34
+    },
+    {
+      "destination": "Hà Nội",
+      "count": 31
+    },
+    {
+      "destination": "Hội An",
+      "count": 31
+    },
+    {
+      "destination": "Huế",
+      "count": 27
+    },
+    {
+      "destination": "Bangkok",
+      "count": 26
+    },
+    {
+      "destination": "Hàn Quốc",
+      "count": 24
+    },
+    {
+      "destination": "Đài Loan",
+      "count": 23
+    },
+    {
+      "destination": "Côn Đảo",
+      "count": 21
+    },
+    {
+      "destination": "Phan Thiết",
+      "count": 21
+    },
+    {
+      "destination": "Nha Trang",
+      "count": 20
+    },
+    {
+      "destination": "Campuchia",
+      "count": 20
+    },
+    {
+      "destination": "hè",
+      "count": 20
+    },
+    {
+      "destination": "Sài Gòn",
+      "count": 20
+    },
+    {
+      "destination": "Hong Kong",
+      "count": 19
+    },
+    {
+      "destination": "Malaysia",
+      "count": 19
+    },
+    {
+      "destination": "Myanmar",
+      "count": 18
+    },
+    {
+      "destination": "Phú Yên",
+      "count": 18
+    },
+    {
+      "destination": "Quy Nhơn",
+      "count": 16
+    },
+    {
+      "destination": "Vũng Tàu",
+      "count": 16
+    },
+    {
+      "destination": "cặp đôi",
+      "count": 16
+    },
+    {
+      "destination": "Tây Bắc",
+      "count": 15
+    },
+    {
+      "destination": "Ninh Bình",
+      "count": 13
+    },
+    {
+      "destination": "Việt Nam",
+      "count": 13
+    },
+    {
+      "destination": "Philippines",
+      "count": 13
+    },
+    {
+      "destination": "Seoul",
+      "count": 13
+    },
+    {
+      "destination": "Cô Tô",
+      "count": 12
+    },
+    {
+      "destination": "Tour Thái Lan 5N4Đ",
+      "count": 11
+    },
+    {
+      "destination": "một mình",
+      "count": 11
+    },
+    {
+      "destination": "Bhutan",
+      "count": 11
+    },
+    {
+      "destination": "Hà Giang",
+      "count": 11
+    },
+    {
+      "destination": "Tour Trung Quốc 6N5Đ",
+      "count": 10
+    },
+    {
+      "destination": "Lào",
+      "count": 10
+    },
+    {
+      "destination": "Thổ Nhĩ Kỳ",
+      "count": 10
+    },
+    {
+      "destination": "Sapa",
+      "count": 10
+    },
+    {
+      "destination": "Quảng Nam",
+      "count": 10
+    },
+    {
+      "destination": "Top 3 khách sạn",
+      "count": 9
+    },
+    {
+      "destination": "Ấn Độ",
+      "count": 9
+    },
+    {
+      "destination": "Ninh Thuận",
+      "count": 9
+    },
+    {
+      "destination": "Cần Thơ",
+      "count": 9
+    },
+    {
+      "destination": "Quảng Bình",
+      "count": 8
+    },
+    {
+      "destination": "Bali",
+      "count": 8
+    },
+    {
+      "destination": "Mỹ",
+      "count": 8
+    },
+    {
+      "destination": "Nghệ An",
+      "count": 8
+    },
+    {
+      "destination": "Hòa Bình",
+      "count": 7
+    }
+  ]
+}
